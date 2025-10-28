@@ -1,0 +1,5 @@
+{
+  "name": "Google Drive PDF Downloader",
+  "description": "A simple tool to convert Google Drive PDF view links into direct downloadable links.",
+  "requestFramePermissions": []
+}
