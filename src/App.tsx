@@ -1,14 +1,15 @@
-import { useId, useState, type ChangeEvent, type FormEvent } from 'react';
-import { CopyButton } from './components/CopyButton';
-import { DownloadIcon } from './components/DownloadIcon';
-import { FileIcon } from './components/FileIcon';
-import { LinkIcon } from './components/LinkIcon';
-import { convertDriveLink, KIND_LABELS, type ConvertedLink } from './lib/driveLink';
+import { useId, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
+import { HowItWorks, SupportedLinks } from './components/InfoSections';
+import { ResultCard } from './components/ResultCard';
+import { ThemeToggle } from './components/ThemeToggle';
+import { AlertCircleIcon, FileDownIcon, LinkIcon, ShieldIcon, XIcon } from './components/icons';
+import { convertDriveLink, type ConvertedLink } from './lib/driveLink';
 
 const App = () => {
   const inputId = useId();
   const errorId = useId();
   const hintId = useId();
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const [driveLink, setDriveLink] = useState('');
   const [result, setResult] = useState<ConvertedLink | null>(null);
@@ -28,109 +29,130 @@ const App = () => {
     } else {
       setResult(null);
       setError(conversion.error);
+      inputRef.current?.focus();
     }
   };
 
+  const reset = () => {
+    setDriveLink('');
+    setResult(null);
+    setError(null);
+    inputRef.current?.focus();
+  };
+
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100 p-4 text-gray-900 selection:bg-purple-500 selection:text-white dark:bg-slate-900 dark:text-gray-100">
-      <div className="mx-auto w-full max-w-2xl">
-        <header className="mb-10 text-center">
-          <div
-            aria-hidden="true"
-            className="mx-auto mb-6 h-2 w-full max-w-sm rounded-full bg-gradient-to-r from-purple-500 to-pink-500"
-          />
-          <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl md:text-5xl">
+    <div className="flex min-h-dvh flex-col">
+      <a
+        href="#main"
+        className="sr-only z-50 rounded-md bg-white px-4 py-2 font-semibold text-brand-700 shadow focus:not-sr-only focus:fixed focus:top-3 focus:left-3 dark:bg-slate-900 dark:text-brand-300"
+      >
+        Skip to content
+      </a>
+
+      <header className="mx-auto flex w-full max-w-3xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
+        <div className="flex items-center gap-2 font-semibold">
+          <span className="flex size-9 items-center justify-center rounded-lg bg-brand-600 text-white shadow-sm">
+            <FileDownIcon className="size-5" />
+          </span>
+          <span className="text-sm sm:text-base">Drive → PDF</span>
+        </div>
+        <ThemeToggle />
+      </header>
+
+      <main id="main" className="mx-auto w-full max-w-3xl flex-1 px-4 pt-6 pb-16 sm:px-6 sm:pt-12">
+        <div className="text-center">
+          <h1 className="text-3xl font-extrabold tracking-tight text-balance sm:text-4xl md:text-5xl">
             Google Drive PDF Downloader
           </h1>
-          <p className="mt-3 text-base text-gray-600 sm:text-lg dark:text-gray-400">
+          <p className="mx-auto mt-4 max-w-xl text-base text-pretty text-slate-600 sm:text-lg dark:text-slate-400">
             Turn a shareable Google Drive link into a direct download link — or export a Google Doc,
             Sheet or Slides deck as PDF.
           </p>
-        </header>
+        </div>
 
-        <main className="rounded-2xl bg-white p-6 shadow-2xl md:p-8 dark:bg-slate-800">
-          <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
-            <label htmlFor={inputId} className="text-lg font-semibold">
+        <div className="card mx-auto mt-8 max-w-2xl p-5 sm:mt-10 sm:p-8">
+          <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-3">
+            <label htmlFor={inputId} className="text-sm font-semibold sm:text-base">
               Google Drive link
             </label>
             <div className="relative">
-              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                <LinkIcon aria-hidden="true" className="h-5 w-5 text-gray-400" />
-              </div>
+              <LinkIcon className="pointer-events-none absolute top-1/2 left-3 size-5 -translate-y-1/2 text-slate-500 dark:text-slate-400" />
               <input
+                ref={inputRef}
                 id={inputId}
                 type="text"
                 inputMode="url"
+                enterKeyHint="go"
                 autoComplete="off"
                 autoCapitalize="off"
+                autoCorrect="off"
                 spellCheck={false}
                 value={driveLink}
                 onChange={handleChange}
                 placeholder="https://drive.google.com/file/d/…/view"
                 aria-invalid={error ? true : undefined}
-                aria-describedby={error ? `${hintId} ${errorId}` : hintId}
-                className="w-full rounded-lg border-2 border-gray-200 bg-gray-50 py-3 pr-4 pl-10 transition-colors duration-300 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500 aria-invalid:border-red-500 dark:border-slate-600 dark:bg-slate-700"
+                aria-describedby={error ? `${errorId} ${hintId}` : hintId}
+                className={`input pl-10 ${driveLink ? 'pr-12' : 'pr-3'}`}
               />
+              {driveLink && (
+                <button
+                  type="button"
+                  onClick={reset}
+                  aria-label="Clear link"
+                  title="Clear link"
+                  className="absolute top-1/2 right-1 flex size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+                >
+                  <XIcon className="size-4" />
+                </button>
+              )}
             </div>
-            <p id={hintId} className="text-sm text-gray-500 dark:text-gray-400">
-              The file must be shared as “Anyone with the link”. Your link is converted locally in
-              your browser and never sent anywhere.
-            </p>
+
             {error && (
-              <p id={errorId} role="alert" className="text-sm text-red-600 dark:text-red-400">
-                {error}
+              <p
+                id={errorId}
+                role="alert"
+                className="flex items-start gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800 dark:bg-red-950/50 dark:text-red-200"
+              >
+                <AlertCircleIcon className="mt-0.5 size-4 shrink-0" />
+                <span>{error}</span>
               </p>
             )}
-            <button
-              type="submit"
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-purple-600 px-4 py-3 font-bold text-white transition-colors duration-300 hover:bg-purple-700 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:outline-none dark:focus:ring-offset-slate-800"
+
+            <p
+              id={hintId}
+              className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-400"
             >
+              <ShieldIcon className="mt-0.5 size-4 shrink-0" />
+              <span>
+                The file must be shared as “Anyone with the link”. Your link is converted locally in
+                your browser and never sent anywhere.
+              </span>
+            </p>
+
+            <button type="submit" className="btn btn-primary mt-1 w-full">
               Convert to download link
             </button>
+
+            <SupportedLinks />
           </form>
 
-          <section aria-live="polite">
+          <section aria-live="polite" aria-label="Result">
             {result && (
-              <div className="mt-8 animate-fade-in border-t border-gray-200 pt-6 dark:border-slate-700">
-                <h2 className="mb-4 text-center text-lg font-semibold">Your download is ready</h2>
-                <div className="flex flex-col gap-4 rounded-lg bg-gray-100 p-4 sm:flex-row sm:items-center sm:justify-between dark:bg-slate-700">
-                  <div className="flex min-w-0 items-center gap-4">
-                    <FileIcon
-                      aria-hidden="true"
-                      className="h-10 w-10 flex-shrink-0 text-purple-500"
-                    />
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium">{KIND_LABELS[result.kind]}</p>
-                      <p
-                        className="truncate font-mono text-xs text-gray-600 dark:text-gray-300"
-                        title={result.downloadUrl}
-                      >
-                        {result.downloadUrl}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex flex-shrink-0 gap-2">
-                    <CopyButton text={result.downloadUrl} />
-                    <a
-                      href={result.downloadUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 font-bold text-white transition-colors duration-300 hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:outline-none dark:focus:ring-offset-slate-700"
-                    >
-                      <DownloadIcon aria-hidden="true" className="h-5 w-5" />
-                      <span>Download</span>
-                    </a>
-                  </div>
-                </div>
+              <div className="mt-6 border-t border-slate-200 pt-6 dark:border-slate-800">
+                <ResultCard key={result.downloadUrl} result={result} onReset={reset} />
               </div>
             )}
           </section>
-        </main>
+        </div>
 
-        <footer className="mt-10 text-center text-sm text-gray-500 dark:text-gray-400">
-          <p>Not affiliated with Google. Large files may show Google’s virus-scan warning first.</p>
-        </footer>
-      </div>
+        <HowItWorks />
+      </main>
+
+      <footer className="border-t border-slate-200 py-6 text-center text-sm text-slate-600 dark:border-slate-800 dark:text-slate-400">
+        <p className="mx-auto max-w-3xl px-4">
+          Not affiliated with Google. Large files may show Google’s virus-scan warning first.
+        </p>
+      </footer>
     </div>
   );
 };

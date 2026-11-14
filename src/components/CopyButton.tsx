@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { AlertCircleIcon, CheckIcon, CopyIcon } from './icons';
 
 type CopyState = 'idle' | 'copied' | 'failed';
 
@@ -8,13 +9,16 @@ const LABELS: Record<CopyState, string> = {
   failed: 'Copy failed',
 };
 
+const ICONS = { idle: CopyIcon, copied: CheckIcon, failed: AlertCircleIcon } as const;
+
 interface CopyButtonProps {
   text: string;
   /** How long the confirmation stays visible, in milliseconds. */
   resetAfterMs?: number;
+  className?: string;
 }
 
-export const CopyButton = ({ text, resetAfterMs = 2000 }: CopyButtonProps) => {
+export const CopyButton = ({ text, resetAfterMs = 2000, className = '' }: CopyButtonProps) => {
   const [state, setState] = useState<CopyState>('idle');
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
@@ -32,14 +36,19 @@ export const CopyButton = ({ text, resetAfterMs = 2000 }: CopyButtonProps) => {
     timer.current = setTimeout(() => setState('idle'), resetAfterMs);
   };
 
+  const Icon = ICONS[state];
+
   return (
     <button
       type="button"
       onClick={handleClick}
       aria-live="polite"
-      className="rounded-lg border-2 border-purple-600 px-4 py-2 font-bold text-purple-700 transition-colors duration-300 hover:bg-purple-50 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:outline-none dark:text-purple-300 dark:hover:bg-slate-600 dark:focus:ring-offset-slate-700"
+      className={`btn btn-secondary ${
+        state === 'copied' ? 'text-green-800! dark:text-green-300!' : ''
+      } ${state === 'failed' ? 'text-red-700! dark:text-red-300!' : ''} ${className}`}
     >
-      {LABELS[state]}
+      <Icon className="size-[18px]" />
+      <span>{LABELS[state]}</span>
     </button>
   );
 };
