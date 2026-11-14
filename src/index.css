@@ -1,12 +1,42 @@
 @import 'tailwindcss';
 
+/* Dark mode follows a `dark` class on <html>, set from the user's preference (see lib/theme.ts). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Design tokens.
+ *
+ * - Brand: purple, kept from the original design. brand-600 on white is 5.4:1 and
+ *   white on brand-600 is 5.4:1, so both pass WCAG AA for body text.
+ * - Success: green-700 for the Download button (white text 5.0:1).
+ * - Neutrals: Tailwind's slate scale. Secondary text uses slate-600 (light) and
+ *   slate-400 (dark), both above 4.5:1 on their surfaces.
+ */
 @theme {
-  --animate-fade-in: fade-in 0.4s ease-out both;
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    'Noto Sans', sans-serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+
+  --color-brand-50: #faf5ff;
+  --color-brand-100: #f3e8ff;
+  --color-brand-200: #e9d5ff;
+  --color-brand-300: #d8b4fe;
+  --color-brand-400: #c084fc;
+  --color-brand-500: #a855f7;
+  --color-brand-600: #9333ea;
+  --color-brand-700: #7e22ce;
+  --color-brand-800: #6b21a8;
+  --color-brand-900: #581c87;
+  --color-brand-950: #3b0764;
+
+  --animate-fade-in: fade-in 0.3s ease-out both;
 
   @keyframes fade-in {
     from {
       opacity: 0;
-      transform: translateY(10px);
+      transform: translateY(6px);
     }
     to {
       opacity: 1;
@@ -15,8 +45,67 @@
   }
 }
 
-:root {
-  color-scheme: light dark;
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  :root.dark {
+    color-scheme: dark;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-slate-50 font-sans text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100;
+  }
+
+  ::selection {
+    @apply bg-brand-600 text-white;
+  }
+
+  /* One focus style for every interactive element, visible in both themes. */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-600 dark:outline-brand-400;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900;
+  }
+
+  /* Buttons: 44px minimum height for comfortable touch targets. */
+  .btn {
+    @apply inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold whitespace-nowrap transition-[color,background-color,border-color] duration-150 select-none disabled:cursor-not-allowed disabled:opacity-60 sm:text-base;
+  }
+
+  .btn-primary {
+    @apply bg-brand-600 text-white shadow-sm hover:bg-brand-700 active:bg-brand-800;
+  }
+
+  .btn-success {
+    @apply bg-green-700 text-white shadow-sm hover:bg-green-800 active:bg-green-900;
+  }
+
+  .btn-secondary {
+    @apply border border-slate-300 bg-white text-slate-800 hover:bg-slate-50 active:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700;
+  }
+
+  .btn-ghost {
+    @apply text-slate-700 hover:bg-slate-100 active:bg-slate-200 dark:text-slate-300 dark:hover:bg-slate-800 dark:active:bg-slate-700;
+  }
+
+  .input {
+    @apply block min-h-12 w-full rounded-lg border border-slate-300 bg-white px-3 text-base text-slate-900 shadow-sm transition-[color,background-color,border-color] duration-150 placeholder:text-slate-500 hover:border-slate-400 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/30 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-400 dark:hover:border-slate-600 dark:focus:border-brand-400 dark:focus:ring-brand-400/30;
+  }
+
+  .input[aria-invalid='true'] {
+    @apply border-red-600 focus:border-red-600 focus:ring-red-600/30 dark:border-red-400 dark:focus:border-red-400 dark:focus:ring-red-400/30;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -24,6 +113,8 @@
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

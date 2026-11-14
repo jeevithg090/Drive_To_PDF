@@ -97,3 +97,32 @@ describe('App', () => {
     expect(screen.getByRole('button', { name: 'Copy failed' })).toBeInTheDocument();
   });
 });
+
+describe('App result actions', () => {
+  it('labels PDF exports and resets the form with "Convert another link"', async () => {
+    const { user, input } = setup();
+    await user.type(input, `https://docs.google.com/spreadsheets/d/${ID}/edit{Enter}`);
+    expect(screen.getByRole('link', { name: /download pdf/i })).toBeInTheDocument();
+    expect(screen.getByDisplayValue(/export\?format=pdf$/)).toHaveAttribute('readonly');
+
+    await user.click(screen.getByRole('button', { name: /convert another link/i }));
+    expect(input).toHaveValue('');
+    expect(input).toHaveFocus();
+    expect(screen.queryByRole('link', { name: /download/i })).not.toBeInTheDocument();
+  });
+
+  it('clears the input with the clear button', async () => {
+    const { user, input } = setup();
+    expect(screen.queryByRole('button', { name: 'Clear link' })).not.toBeInTheDocument();
+    await user.type(input, 'drive.google.com');
+    await user.click(screen.getByRole('button', { name: 'Clear link' }));
+    expect(input).toHaveValue('');
+    expect(input).toHaveFocus();
+  });
+
+  it('moves focus back to the input after a validation error', async () => {
+    const { user, input, submit } = setup();
+    await user.click(submit);
+    expect(input).toHaveFocus();
+  });
+});
