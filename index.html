@@ -2,23 +2,55 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Google Drive PDF Downloader</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Google Drive PDF Downloader — direct download links in your browser</title>
     <meta
       name="description"
       content="Convert Google Drive share links into direct download links, or export Google Docs, Sheets and Slides as PDF. Runs entirely in your browser."
     />
-    <meta name="theme-color" content="#9333ea" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f8fafc" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#020617" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Google Drive PDF Downloader" />
     <meta property="og:title" content="Google Drive PDF Downloader" />
     <meta
       property="og:description"
       content="Convert Google Drive share links into direct download links, or export Google Docs, Sheets and Slides as PDF."
     />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Google Drive PDF Downloader" />
+    <meta
+      name="twitter:description"
+      content="Convert Google Drive share links into direct download links, or export Google Docs, Sheets and Slides as PDF."
+    />
+
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <!-- Apply the saved theme before first paint to avoid a flash (mirrors src/lib/theme.ts). -->
+    <script>
+      (function () {
+        var pref = 'system';
+        try {
+          pref = localStorage.getItem('drive-pdf-theme') || 'system';
+        } catch (e) {}
+        var dark =
+          pref === 'dark' ||
+          (pref !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.classList.toggle('dark', dark);
+        document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+      })();
+    </script>
   </head>
   <body>
-    <noscript>This app needs JavaScript enabled to convert links.</noscript>
+    <noscript>
+      <p style="padding: 1rem; font-family: system-ui, sans-serif">
+        This app needs JavaScript enabled to convert links.
+      </p>
+    </noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
