@@ -1,9 +1,6 @@
+import type { SVGProps } from 'react';
 
-import React from 'react';
-
-interface IconProps extends React.SVGProps<SVGSVGElement> {}
-
-export const FileIcon: React.FC<IconProps> = (props) => (
+export const FileIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg
     {...props}
     xmlns="http://www.w3.org/2000/svg"
